@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import assets from '../assets/assets';
 import { imagesDummyData } from '../assets/assets.js';
 import { AuthContext } from '../../context/AuthContext.jsx';
-
+ 
 const RightSidebar = ({ selectedUser }) => {
   const { logout } = useContext(AuthContext);
 

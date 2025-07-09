@@ -1,4 +1,3 @@
-// src/components/Sidebar.jsx
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import assets from '../assets/assets.js';
@@ -9,10 +8,8 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const { logout, onlineUsers } = useContext(AuthContext);
   const [input, setInput] = useState("");
+  const { users, selectedUser, setSelectedUser, getUsers,unseenMessages } = useContext(ChatContext);
 
-  const { users, selectedUser, setSelectedUser, getUsers } = useContext(ChatContext);
-
-  // Corrected filter logic
   const filteredUsers = input
     ? users.filter(user =>
         user.fullName.toLowerCase().includes(input.toLowerCase())
@@ -24,19 +21,21 @@ const Sidebar = () => {
     // eslint-disable-next-line
   }, [onlineUsers]);
 
-  // Debug: See if users are fetched
-  // console.log(users);
+  // Debug: See if users and onlineUsers are fetched
+  useEffect(() => {
+    console.log("Sidebar users:", users.map(u => u._id));
+    console.log("Online users in sidebar:", onlineUsers);
+  }, [users, onlineUsers]);
 
   return (
-    <div
-      className={`pb-5 text-white max-h-screen overflow-hidden ${
-        selectedUser ? 'max-md:hidden' : ''
-      }`}
-    >
+ <div
+  className={`pb-5 text-white max-h-screen overflow-hidden border-r border-gray-400 ${
+    selectedUser ? 'max-md:hidden' : ''
+  }`}
+>
       {/* Top Section */}
       <div className="flex justify-between items-center px-4 pt-4">
         <img src={assets.logo} alt="logo" className="max-w-40" />
-
         <div className="relative py-2 group">
           <img
             src={assets.menu_icon}
@@ -83,7 +82,7 @@ const Sidebar = () => {
       </div>
 
       {/* User List */}
-      <div className="px-4 overflow-y-auto max-h-[calc(100vh-160px)] space-y-4 pr-2 scrollbar-thin scrollbar-thumb-gray-700">
+      <div className="px-4 overflow-y-auto max-h-[calc(100vh-160px)] space-y-4 pr-2 pb-4 scrollbar-thin scrollbar-thumb-gray-700">
         {filteredUsers.length === 0 && (
           <div className="text-gray-400 text-center mt-8">No users found.</div>
         )}
@@ -91,19 +90,17 @@ const Sidebar = () => {
         {filteredUsers.map((user, index) => (
           <div
             key={user._id}
-    onClick={() => {
-  console.log("Selected user:", user.bio);
-  setSelectedUser(user);
-}}
-
+            onClick={() => setSelectedUser(user)}
             className={`relative flex items-center gap-4 bg-[#282142] p-3 rounded-xl text-white hover:bg-[#3a2a60] transition cursor-pointer ${
               selectedUser && selectedUser._id === user._id ? 'ring-2 ring-violet-500' : ''
             }`}
           >
             {/* Index badge */}
-            <span className="absolute top-4 right-4 text-xs h-5 w-5 flex justify-center items-center bg-violet-500/50 rounded-full">
-              {index + 1}
-            </span>
+           {unseenMessages[user?._id] > 0 && (
+  <span className="absolute top-4 right-4 text-xs h-5 w-5 flex justify-center items-center bg-violet-500/50 rounded-full">
+    {unseenMessages[user._id]}
+  </span>
+)}
 
             <img
               src={user.profilePic}
@@ -115,10 +112,10 @@ const Sidebar = () => {
                 {user.fullName}
                 <span
                   className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                    onlineUsers.includes(user._id) ? 'bg-green-500' : 'bg-gray-500'
+                    onlineUsers.includes(user._id.toString()) ? 'bg-green-500' : 'bg-gray-500'
                   }`}
                 >
-                  {onlineUsers.includes(user._id) ? 'Online' : 'Offline'}
+                  {onlineUsers.includes(user._id.toString()) ? 'Online' : 'Offline'}
                 </span>
               </h4>
               <p className="text-xs text-gray-300">{user.bio}</p>

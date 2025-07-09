@@ -1,13 +1,44 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import assets from '../assets/assets.js';
-import { messagesDummyData } from '../assets/assets.js';
+import { ChatContext } from '../../context/ChatContext.jsx';
+import { AuthContext } from '../../context/AuthContext.jsx';
+import toast from "react-hot-toast";
 
-const myUserId = 'ksj';
+const ChatContainer = () => {
+  const { messages, sendMessage, selectedUser } = useContext(ChatContext);
+  const { authUser, onlineUsers } = useContext(AuthContext);
+  const myUserId = authUser?._id;
+  const [input, setInput] = useState("");
 
-const ChatContainer = ({ selectedUser }) => {
+  // Message sending function
+  const handleSubmitMessage = async (e) => {
+    e.preventDefault();
+    if (input.trim() === "") return;
+    sendMessage({ text: input.trim() });
+    setInput("");
+  };
 
+  // Handle sending an image
+  const handleSendImage = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith("image/")) {
+      toast.error("Select an image file");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      await sendMessage({ image: reader.result });
+      e.target.value = "";
+    };
+    reader.readAsDataURL(file);
+  };
 
- 
+  // Safe check for online status
+  const isOnline =
+    Array.isArray(onlineUsers) &&
+    selectedUser &&
+    selectedUser._id &&
+    onlineUsers.includes(selectedUser._id.toString());
 
   if (!selectedUser) {
     return (
@@ -28,37 +59,29 @@ const ChatContainer = ({ selectedUser }) => {
   }
 
   return (
-    <div className="
-    
-    
-    
-    
-   h-full w-full overflow-y-auto scrollbar-hide px-4 py-2
-    style={{ maxHeight: 'calc(100vh - 160px)' }}
-  
-    
-    
-    
-    
-    ">
-
-      {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b border-gray-600 bg-[#282142]">
-        <div className="flex items-center gap-2">
+    <div className="h-full w-full flex flex-col text-white relative">
+      {/* Header - fixed at top */}
+<div className="flex justify-between items-center px-6 py-4 border border-violet-500 rounded-xl shadow-md ">
+        <div className="flex justify-between items-center px-4 pt-4 " >
           <img
             src={selectedUser.profilePic}
             alt={selectedUser.fullName}
             className="w-10 h-10 rounded-full object-cover"
           />
-          <span className="font-medium text-sm">{selectedUser.fullName}</span>
-          <span className="h-2 w-2 bg-green-500 rounded-full" />
+          <span className="font-medium text-base">{selectedUser.fullName}</span>
+          <span
+            className={`h-3 w-3 rounded-full ml-2 border-2 border-[#282142] ${
+              isOnline ? 'bg-green-500' : 'bg-gray-500'
+            }`}
+            title={isOnline ? 'Online' : 'Offline'}
+          ></span>
         </div>
         <img src={assets.help_icon} alt="Help" className="w-5 h-5 cursor-pointer" />
       </div>
 
-      {/* Chat messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4 scrollbar-thin scrollbar-thumb-gray-700">
-        {messagesDummyData.map((msg) => {
+      {/* Chat messages - scrollable area */}
+    <div className="px-4 overflow-y-auto max-h-[calc(100vh-160px)] space-y-4 pr-2 pb-4 scrollbar-thin scrollbar-thumb-gray-700">
+        {messages.map((msg) => {
           const isSender = msg.senderId === myUserId;
           const time = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -91,30 +114,52 @@ const ChatContainer = ({ selectedUser }) => {
                 )}
                 <p className="text-[10px] text-gray-300 text-right mt-1">{time}</p>
               </div>
-              {isSender && (
-                <img
-                  src={assets.profile_martin}
-                  alt="sender"
-                  className="w-6 h-6 rounded-full object-cover"
-                />
-              )}
+           {isSender && (
+  <img
+    src={authUser?.profilePic || assets.profile_martin}
+    alt="sender"
+    className="w-6 h-6 rounded-full object-cover"
+  />
+)}
+
             </div>
           );
         })}
-       
       </div>
 
-      {/* Typing Bar */}
-      <div className="w-full flex items-center gap-3 p-3 bg-[#282142] border-t border-gray-600">
+      {/* Typing Bar - fixed at bottom */}
+      <form
+        className="absolute bottom-0 left-0 w-full flex items-center gap-3 p-4 bg-[#282142] border-t border-gray-600 z-10"
+        style={{ height: "76px" }}
+        onSubmit={handleSubmitMessage}
+      >
+        {/* File input for image sending */}
+        <label className="cursor-pointer">
+          <span className="bg-gray-700 hover:bg-violet-500 px-3 py-2 rounded-full text-sm font-medium flex items-center justify-center mr-2">
+            📎
+          </span>
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleSendImage}
+          />
+        </label>
         <input
           type="text"
           placeholder="Type your message..."
+          onChange={(e) => setInput(e.target.value)}
+          value={input}
+          onKeyDown={(e) => e.key === "Enter" ? handleSubmitMessage(e) : null}
           className="flex-1 bg-[#1c1c2e] text-sm text-white px-4 py-2 rounded-full outline-none border border-gray-600"
         />
-        <button className="bg-violet-500 hover:bg-violet-600 px-4 py-2 rounded-full text-sm font-medium">
+        <button
+          type="submit"
+          className="bg-violet-500 hover:bg-violet-600 px-4 py-2 rounded-full text-sm font-medium"
+        >
           Send
         </button>
-      </div>
+      </form>
     </div>
   );
 };

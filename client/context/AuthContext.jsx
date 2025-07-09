@@ -1,4 +1,3 @@
-// AuthContext.jsx
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -25,7 +24,10 @@ export const AppProvider = ({ children }) => {
     setSocket(newSocket);
 
     newSocket.on("getOnlineUsers", (userIds) => {
-      setOnlineUsers(userIds);
+      // Ensure all IDs are strings for comparison
+      const stringIds = userIds.map(id => id.toString());
+      setOnlineUsers(stringIds);
+      console.log("Online users received:", stringIds);
     });
   };
 
@@ -49,26 +51,24 @@ export const AppProvider = ({ children }) => {
     }
   };
 
- const login = async (state, credentials) => {
-  try {
-    const { data } = await axios.post(`/api/auth/${state}`, credentials);
-    if (data.success) {
-      setAuthUser(data.userData);   // yha se user_.id bhi mil jegi ise to simple ise auth se access kr skte ho ap 
-      connectSocket(data.userData);
-      axios.defaults.headers.common["token"] = data.token;
-      setToken(data.token);
-      localStorage.setItem("token", data.token);
-      toast.success(data.message);
-    } else {
-      toast.error(data.message);
+  const login = async (state, credentials) => {
+    try {
+      const { data } = await axios.post(`/api/auth/${state}`, credentials);
+      if (data.success) {
+        setAuthUser(data.userData);
+        connectSocket(data.userData);
+        axios.defaults.headers.common["token"] = data.token;
+        setToken(data.token);
+        localStorage.setItem("token", data.token);
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-  }
-};
+  };
 
-
-  // Logout function
   const logout = async () => {
     localStorage.removeItem("token");
     setToken(null);
@@ -79,28 +79,23 @@ export const AppProvider = ({ children }) => {
     if (socket) socket.disconnect();
   };
 
-  // Update profile function
-// context/AuthContext.js
-const updateProfile = async (body) => {
-  try {
-    const { data } = await axios.put("/api/auth/update", body);
-    if (data.success) {
-      setAuthUser(data.user);
-      toast.success("Profile updated successfully");
-    } else {
-      toast.error(data.message || "Failed to update profile");
+  const updateProfile = async (body) => {
+    try {
+      const { data } = await axios.put("/api/auth/update", body);
+      if (data.success) {
+        setAuthUser(data.user);
+        toast.success("Profile updated successfully");
+      } else {
+        toast.error(data.message || "Failed to update profile");
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to update profile"
+      );
     }
-  } catch (error) {
-    toast.error(
-      error.response?.data?.message ||
-      error.message ||
-      "Failed to update profile"
-    );
-  }
-};
-
-
-
+  };
 
   useEffect(() => {
     if (token) {

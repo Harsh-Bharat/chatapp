@@ -20,21 +20,28 @@ export const io = new Server(server, {
   }
 });
 // ---------------socket connection -----------------------
-export const hashmap={};  // to store all the online users 
+export const hashmap = {}; // to store all the online users
+
 io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
-  // Now you can use userId as needed
-  console.log("User connected:", userId);     
-  if(userId){
-    hashmap[userId]=Socket.id;
+  console.log("User connected:", userId);
+
+  if (userId) {
+    hashmap[userId] = socket.id; // Use the socket instance's id
   }
-  io.emit("getonlineusers",Object.keys(hashmap)); // this will return the userID's who are in map
- io.on("disconnect",(Socket)=>{
-  console.log("user disconnected");
-  delete hashmap[userId];
-    io.emit("getonlineusers",Object.keys(hashmap));
- })
-})
+
+  // Emit the updated online users list (event name should match frontend)
+  io.emit("getOnlineUsers", Object.keys(hashmap));
+
+  // Listen for disconnect on this socket only
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", userId);
+    if (userId) {
+      delete hashmap[userId];
+      io.emit("getOnlineUsers", Object.keys(hashmap));
+    }
+  });
+});
 
 // middlware setup
 app.use(cors());

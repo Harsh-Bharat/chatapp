@@ -1,8 +1,16 @@
 @import "tailwindcss";
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+/* Add this at the end of your CSS file */
+.custom-scrollbar {
+  scrollbar-width: thin;              /* Firefox */
+  scrollbar-color: #8b5cf6 #1f2937;   /* thumb color, track color */
 }
-.scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  background: #1f2937;                /* track color */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #8b5cf6;                /* thumb color */
+  border-radius: 4px;
 }
