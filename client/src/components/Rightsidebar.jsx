@@ -51,8 +51,8 @@ const isOnline =
         {/* Media Section */}
         <div className="px-5 text-xs">
           <p className="mb-2">Media</p>
-          <div className="mt-2 max-h-[400px] overflow-y-scroll grid grid-cols-2 gap-4 opacity-80 scrollbar-hide">
-            {imagemessages.map((url, index) => (
+         <div className="mt-2 max-h-[400px] w-[450px] overflow-y-scroll grid grid-cols-5 gap-4 opacity-80 scrollbar-hide">
+{imagemessages.map((url, index) => (
               <div
                 key={index}
                 onClick={() => window.open(url)}
@@ -61,7 +61,7 @@ const isOnline =
                 <img
                   src={url}
                   alt=""
-                  className="h-full w-full rounded-md object-cover"
+                  className=" w-full rounded-md object-cover"
                 />
               </div>
             ))}
