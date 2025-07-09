@@ -80,7 +80,7 @@ const ChatContainer = () => {
       </div>
 
       {/* Chat messages - scrollable area */}
-    <div className="px-4 overflow-y-auto max-h-[calc(100vh-160px)] space-y-4 pr-2 pb-4 scrollbar-thin scrollbar-thumb-gray-700">
+    <div className="px-4 overflow-y-auto max-h-[calc(100vh-160px)] space-y-4 pr-2 pb-4 scrollbar-hide">
         {messages.map((msg) => {
           const isSender = msg.senderId === myUserId;
           const time = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -130,7 +130,7 @@ const ChatContainer = () => {
       {/* Typing Bar - fixed at bottom */}
       <form
         className="absolute bottom-0 left-0 w-full flex items-center gap-3 p-4 bg-[#282142] border-t border-gray-600 z-10"
-        style={{ height: "76px" }}
+        style={{ height: "50px" }}
         onSubmit={handleSubmitMessage}
       >
         {/* File input for image sending */}

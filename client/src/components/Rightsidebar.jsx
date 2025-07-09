@@ -9,7 +9,7 @@ const RightSidebar = ({ selectedUser }) => {
   if (!selectedUser) return null; // Render nothing if no user is selected
 
   return (
-    <div className="h-full w-full bg-[#18122B] text-white relative flex flex-col">
+    <div className="h-full w-full  text-white relative flex flex-col border-l border-gray-400">
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
         {/* User Info */}
